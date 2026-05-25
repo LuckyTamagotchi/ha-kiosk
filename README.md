@@ -16,4 +16,5 @@ Moonbase Monitor 2: light.moonbase_monitor_2
 Bedroom: switch.smart_indoor_plug_socket_1
 
 ## HA URL
-http://192.168.1.19:8123
+http://192.168.1.19:8123/local/kiosk.html
+
