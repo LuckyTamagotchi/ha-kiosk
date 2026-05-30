@@ -76,25 +76,9 @@
   .all-color-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #444; letter-spacing: 0.1em; text-transform: uppercase; -webkit-flex-shrink: 0; flex-shrink: 0; min-width: 28px; margin-right: 10px; }
   .piano-bulbs-grid { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
 
-  /* Dim overlay */
-  #dim-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: #000;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 9000;
-    -webkit-transition: opacity 2s ease; transition: opacity 2s ease;
-  }
-  #dim-overlay.dimmed {
-    opacity: 0.97;
-    pointer-events: all;
-  }
 </style>
 </head>
 <body>
-
-<div id="dim-overlay" onclick="wakeUp()"></div>
 
 <div class="kiosk-root">
   <div class="header">
@@ -298,25 +282,6 @@ var MOONBASE_LIGHTS = [
 ];
 
 var toastTimer;
-var dimTimer;
-var DIM_DELAY = 5 * 60 * 1000;
-
-function resetDimTimer() {
-  clearTimeout(dimTimer);
-  dimTimer = setTimeout(function() {
-    document.getElementById('dim-overlay').className = 'dimmed';
-  }, DIM_DELAY);
-}
-
-function wakeUp() {
-  document.getElementById('dim-overlay').className = '';
-  resetDimTimer();
-}
-
-document.addEventListener('touchstart', function() { resetDimTimer(); }, true);
-document.addEventListener('click', function() { resetDimTimer(); }, true);
-
-resetDimTimer();
 
 function showToast(msg, isError) {
   var t = document.getElementById('toast');
