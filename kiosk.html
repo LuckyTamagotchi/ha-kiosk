@@ -16,7 +16,17 @@
   .header-title { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.15em; color: #555; text-transform: uppercase; }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #2d6a4f; display: inline-block; margin-right: 8px; }
   .status-dot.error { background: #8b2020; }
-  .room-card { background: #111; border: 1px solid #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+
+  /* Tabs */
+  .tabs { display: -webkit-flex; display: flex; -webkit-align-items: flex-end; align-items: flex-end; margin-bottom: 0; }
+  .tab-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 22px; background: #0d0d0d; border: 1px solid #222; border-bottom: none; color: #444; cursor: pointer; border-radius: 6px 6px 0 0; margin-right: 3px; position: relative; top: 1px; }
+  .tab-btn.active { background: #111; color: #52b788; border-color: #2a2a2a; padding-top: 9px; }
+  .tab-body { border: 1px solid #2a2a2a; border-radius: 0 6px 6px 6px; padding: 14px; background: #111; margin-bottom: 14px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .room-card { background: #111; border: 1px solid #1e1e1e; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+  .room-card:last-child { margin-bottom: 0; }
   .room-header { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #1a1a1a; }
   .room-name { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; color: #cccccc; text-transform: uppercase; font-weight: 500; }
   .toggle-switch { position: relative; width: 44px; height: 24px; -webkit-flex-shrink: 0; flex-shrink: 0; }
@@ -75,7 +85,6 @@
   .all-color-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
   .all-color-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #444; letter-spacing: 0.1em; text-transform: uppercase; -webkit-flex-shrink: 0; flex-shrink: 0; min-width: 28px; margin-right: 10px; }
   .piano-bulbs-grid { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
-
 </style>
 </head>
 <body>
@@ -86,182 +95,319 @@
     <button class="all-off-btn" onclick="allOff()">All off</button>
   </div>
 
-  <!-- PIANO LAMP -->
-  <div class="room-card">
-    <div class="room-header">
-      <span class="room-name">Piano Lamp</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="piano-all" onchange="toggleRoom('piano', this.checked)">
-        <div class="toggle-track"></div>
-      </label>
-    </div>
-    <div class="room-body">
-      <div class="section-label">Brightness</div>
-      <div class="brightness-row">
-        <span class="brightness-label active" id="bri-lbl-piano">100%</span>
-        <input type="range" min="1" max="255" value="255" id="bri-piano" onchange="setBrightnessAll(this.value)">
-      </div>
-      <div class="divider"></div>
-      <div class="section-label">All bulbs — color</div>
-      <div class="all-color-row">
-        <span class="all-color-label">All</span>
-        <div class="color-swatches" id="piano-all-colors">
-          <div class="swatch" style="background:#ff6b6b" onclick="setColorAll('255,107,107', this)"></div>
-          <div class="swatch" style="background:#ffa94d" onclick="setColorAll('255,169,77', this)"></div>
-          <div class="swatch" style="background:#ffe066" onclick="setColorAll('255,224,102', this)"></div>
-          <div class="swatch" style="background:#ffd9a0" onclick="setColorAll('255,217,160', this)"></div>
-          <div class="swatch" style="background:#ffffff" onclick="setColorAll('255,255,255', this)"></div>
-          <div class="swatch" style="background:#74c69d" onclick="setColorAll('116,198,157', this)"></div>
-          <div class="swatch" style="background:#4dabf7" onclick="setColorAll('77,171,247', this)"></div>
-          <div class="swatch" style="background:#9775fa" onclick="setColorAll('151,117,250', this)"></div>
-          <div class="swatch" style="background:#f783ac" onclick="setColorAll('247,131,172', this)"></div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-btn-home" onclick="showTab('home')">Home</button>
+    <button class="tab-btn" id="tab-btn-office" onclick="showTab('office')">Office</button>
+  </div>
+
+  <div class="tab-body">
+
+    <!-- HOME TAB -->
+    <div class="tab-content active" id="tab-home">
+
+      <!-- PIANO LAMP -->
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">Piano Lamp</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="piano-all" onchange="toggleRoom('piano', this.checked)">
+            <div class="toggle-track"></div>
+          </label>
         </div>
-        <input type="color" id="wheel-piano-all" value="#ffffff" onchange="setColorAllWheel(this.value)">
-      </div>
-      <div class="divider"></div>
-      <button class="expand-btn" id="expand-indiv" onclick="toggleSection('indiv')">
-        Individual bulbs <span class="chevron">&#9662;</span>
-      </button>
-      <div class="collapsible" id="section-indiv">
-        <div class="piano-bulbs-grid">
-
-          <div class="light-row" id="row-piano-left">
-            <div class="light-top">
-              <span class="light-name" id="name-piano-left">Left</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="tog-piano-left" onchange="toggleLight('light.pianoleft', this.checked, 'piano-left')">
-                <div class="toggle-track"></div>
-              </label>
+        <div class="room-body">
+          <div class="section-label">Brightness</div>
+          <div class="brightness-row">
+            <span class="brightness-label active" id="bri-lbl-piano">100%</span>
+            <input type="range" min="1" max="255" value="255" id="bri-piano" onchange="setBrightnessAll(this.value)">
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">All bulbs — color</div>
+          <div class="all-color-row">
+            <span class="all-color-label">All</span>
+            <div class="color-swatches" id="piano-all-colors">
+              <div class="swatch" style="background:#ff6b6b" onclick="setColorAll('255,107,107', this)"></div>
+              <div class="swatch" style="background:#ffa94d" onclick="setColorAll('255,169,77', this)"></div>
+              <div class="swatch" style="background:#ffe066" onclick="setColorAll('255,224,102', this)"></div>
+              <div class="swatch" style="background:#ffd9a0" onclick="setColorAll('255,217,160', this)"></div>
+              <div class="swatch" style="background:#ffffff" onclick="setColorAll('255,255,255', this)"></div>
+              <div class="swatch" style="background:#74c69d" onclick="setColorAll('116,198,157', this)"></div>
+              <div class="swatch" style="background:#4dabf7" onclick="setColorAll('77,171,247', this)"></div>
+              <div class="swatch" style="background:#9775fa" onclick="setColorAll('151,117,250', this)"></div>
+              <div class="swatch" style="background:#f783ac" onclick="setColorAll('247,131,172', this)"></div>
             </div>
-            <button class="expand-btn" id="expand-piano-left-color" onclick="toggleSection('piano-left-color')">
-              <span class="color-preview-dot" id="dot-piano-left"></span>Color <span class="chevron">&#9662;</span>
-            </button>
-            <div class="collapsible" id="section-piano-left-color">
-              <div class="color-swatches" id="colors-piano-left">
-                <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.pianoleft','255,107,107','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.pianoleft','255,169,77','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.pianoleft','255,224,102','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.pianoleft','255,217,160','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.pianoleft','255,255,255','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.pianoleft','116,198,157','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.pianoleft','77,171,247','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.pianoleft','151,117,250','colors-piano-left','dot-piano-left',this)"></div>
-                <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.pianoleft','247,131,172','colors-piano-left','dot-piano-left',this)"></div>
-              </div>
-              <div class="color-wheel-row">
-                <span class="color-wheel-label">Custom</span>
-                <input type="color" id="wheel-piano-left" value="#ffffff" onchange="setColorWheel('light.pianoleft', this.value, 'dot-piano-left', 'colors-piano-left')">
-              </div>
+            <input type="color" id="wheel-piano-all" value="#ffffff" onchange="setColorAllWheel(this.value)">
+          </div>
+          <div class="divider"></div>
+          <button class="expand-btn" id="expand-indiv" onclick="toggleSection('indiv')">
+            Individual bulbs <span class="chevron">&#9662;</span>
+          </button>
+          <div class="collapsible" id="section-indiv">
+            <div class="piano-bulbs-grid">
+
+              <div class="light-row" id="row-piano-left">
+                <div class="light-top">
+                  <span class="light-name" id="name-piano-left">Left</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="tog-piano-left" onchange="toggleLight('light.pianoleft', this.checked, 'piano-left')">
+                    <div class="toggle-track"></div>
+                  </label>
+                </div>
+                <div class="color-swatches" id="colors-piano-left">
+                    <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.pianoleft','255,107,107','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.pianoleft','255,169,77','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.pianoleft','255,224,102','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.pianoleft','255,217,160','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.pianoleft','255,255,255','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.pianoleft','116,198,157','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.pianoleft','77,171,247','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.pianoleft','151,117,250','colors-piano-left','dot-piano-left',this)"></div>
+                    <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.pianoleft','247,131,172','colors-piano-left','dot-piano-left',this)"></div>
+                  </div>
+                  <div class="color-wheel-row">
+                    <span class="color-wheel-label">Custom</span>
+                    <input type="color" id="wheel-piano-left" value="#ffffff" onchange="setColorWheel('light.pianoleft', this.value, 'dot-piano-left', 'colors-piano-left')">
+          </div>
+        </div>
+
+              <div class="light-row" id="row-piano-mid">
+                <div class="light-top">
+                  <span class="light-name" id="name-piano-mid">Middle</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="tog-piano-mid" onchange="toggleLight('light.pianomiddle', this.checked, 'piano-mid')">
+                    <div class="toggle-track"></div>
+                  </label>
+                </div>
+                <div class="color-swatches" id="colors-piano-mid">
+                    <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.pianomiddle','255,107,107','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.pianomiddle','255,169,77','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.pianomiddle','255,224,102','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.pianomiddle','255,217,160','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.pianomiddle','255,255,255','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.pianomiddle','116,198,157','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.pianomiddle','77,171,247','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.pianomiddle','151,117,250','colors-piano-mid','dot-piano-mid',this)"></div>
+                    <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.pianomiddle','247,131,172','colors-piano-mid','dot-piano-mid',this)"></div>
+                  </div>
+                  <div class="color-wheel-row">
+                    <span class="color-wheel-label">Custom</span>
+                    <input type="color" id="wheel-piano-mid" value="#ffffff" onchange="setColorWheel('light.pianomiddle', this.value, 'dot-piano-mid', 'colors-piano-mid')">
+          </div>
+        </div>
+
+              <div class="light-row" id="row-piano-right">
+                <div class="light-top">
+                  <span class="light-name" id="name-piano-right">Right</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="tog-piano-right" onchange="toggleLight('light.pianoright', this.checked, 'piano-right')">
+                    <div class="toggle-track"></div>
+                  </label>
+                </div>
+                <div class="color-swatches" id="colors-piano-right">
+                    <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.pianoright','255,107,107','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.pianoright','255,169,77','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.pianoright','255,224,102','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.pianoright','255,217,160','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.pianoright','255,255,255','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.pianoright','116,198,157','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.pianoright','77,171,247','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.pianoright','151,117,250','colors-piano-right','dot-piano-right',this)"></div>
+                    <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.pianoright','247,131,172','colors-piano-right','dot-piano-right',this)"></div>
+                  </div>
+                  <div class="color-wheel-row">
+                    <span class="color-wheel-label">Custom</span>
+                    <input type="color" id="wheel-piano-right" value="#ffffff" onchange="setColorWheel('light.pianoright', this.value, 'dot-piano-right', 'colors-piano-right')">
+          </div>
+        </div>
+
             </div>
           </div>
-
-          <div class="light-row" id="row-piano-mid">
-            <div class="light-top">
-              <span class="light-name" id="name-piano-mid">Middle</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="tog-piano-mid" onchange="toggleLight('light.pianomiddle', this.checked, 'piano-mid')">
-                <div class="toggle-track"></div>
-              </label>
-            </div>
-            <button class="expand-btn" id="expand-piano-mid-color" onclick="toggleSection('piano-mid-color')">
-              <span class="color-preview-dot" id="dot-piano-mid"></span>Color <span class="chevron">&#9662;</span>
-            </button>
-            <div class="collapsible" id="section-piano-mid-color">
-              <div class="color-swatches" id="colors-piano-mid">
-                <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.pianomiddle','255,107,107','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.pianomiddle','255,169,77','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.pianomiddle','255,224,102','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.pianomiddle','255,217,160','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.pianomiddle','255,255,255','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.pianomiddle','116,198,157','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.pianomiddle','77,171,247','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.pianomiddle','151,117,250','colors-piano-mid','dot-piano-mid',this)"></div>
-                <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.pianomiddle','247,131,172','colors-piano-mid','dot-piano-mid',this)"></div>
-              </div>
-              <div class="color-wheel-row">
-                <span class="color-wheel-label">Custom</span>
-                <input type="color" id="wheel-piano-mid" value="#ffffff" onchange="setColorWheel('light.pianomiddle', this.value, 'dot-piano-mid', 'colors-piano-mid')">
-              </div>
-            </div>
-          </div>
-
-          <div class="light-row" id="row-piano-right">
-            <div class="light-top">
-              <span class="light-name" id="name-piano-right">Right</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="tog-piano-right" onchange="toggleLight('light.pianoright', this.checked, 'piano-right')">
-                <div class="toggle-track"></div>
-              </label>
-            </div>
-            <button class="expand-btn" id="expand-piano-right-color" onclick="toggleSection('piano-right-color')">
-              <span class="color-preview-dot" id="dot-piano-right"></span>Color <span class="chevron">&#9662;</span>
-            </button>
-            <div class="collapsible" id="section-piano-right-color">
-              <div class="color-swatches" id="colors-piano-right">
-                <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.pianoright','255,107,107','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.pianoright','255,169,77','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.pianoright','255,224,102','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.pianoright','255,217,160','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.pianoright','255,255,255','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.pianoright','116,198,157','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.pianoright','77,171,247','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.pianoright','151,117,250','colors-piano-right','dot-piano-right',this)"></div>
-                <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.pianoright','247,131,172','colors-piano-right','dot-piano-right',this)"></div>
-              </div>
-              <div class="color-wheel-row">
-                <span class="color-wheel-label">Custom</span>
-                <input type="color" id="wheel-piano-right" value="#ffffff" onchange="setColorWheel('light.pianoright', this.value, 'dot-piano-right', 'colors-piano-right')">
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- MOONBASE -->
-  <div class="room-card">
-    <div class="room-header">
-      <span class="room-name">Moonbase</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="moonbase-all" onchange="toggleRoom('moonbase', this.checked)">
-        <div class="toggle-track"></div>
-      </label>
-    </div>
-    <div class="room-body">
-      <div class="section-label">Brightness</div>
-      <div class="brightness-row">
-        <span class="brightness-label active" id="bri-lbl-moonbase">100%</span>
-        <input type="range" min="1" max="255" value="255" id="bri-moonbase" onchange="setBrightnessRoom('moonbase', this.value)">
+      <!-- MOONBASE -->
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">Moonbase</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="moonbase-all" onchange="toggleRoom('moonbase', this.checked)">
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="room-body">
+          <div class="section-label">Brightness</div>
+          <div class="brightness-row">
+            <span class="brightness-label active" id="bri-lbl-moonbase">100%</span>
+            <input type="range" min="1" max="255" value="255" id="bri-moonbase" onchange="setBrightnessRoom('moonbase', this.value)">
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">Scenes</div>
+          <div class="scenes-row" id="moonbase-scenes">
+            <button class="scene-btn" onclick="activateScene('scene.the_moonbase_solene', 'moonbase-scenes', this)">Sol&#232;ne</button>
+            <button class="scene-btn" onclick="activateScene('scene.the_moonbase_sailor_saturn', 'moonbase-scenes', this)">Sailor Saturn</button>
+            <button class="scene-btn" onclick="activateScene('scene.the_moonbase_sailor_moon', 'moonbase-scenes', this)">Sailor Moon</button>
+            <button class="scene-btn" onclick="activateScene('scene.the_moonbase_sailor_cosmos', 'moonbase-scenes', this)">Sailor Cosmos</button>
+            <button class="scene-btn" onclick="activateScene('scene.the_moonbase_pokemon', 'moonbase-scenes', this)">Pok&#233;mon</button>
+          </div>
+        </div>
       </div>
-      <div class="divider"></div>
-      <div class="section-label">Scenes</div>
-      <div class="scenes-row" id="moonbase-scenes">
-        <button class="scene-btn" onclick="activateScene('scene.the_moonbase_solene', 'moonbase-scenes', this)">Sol&#232;ne</button>
-        <button class="scene-btn" onclick="activateScene('scene.the_moonbase_sailor_saturn', 'moonbase-scenes', this)">Sailor Saturn</button>
-        <button class="scene-btn" onclick="activateScene('scene.the_moonbase_sailor_moon', 'moonbase-scenes', this)">Sailor Moon</button>
-        <button class="scene-btn" onclick="activateScene('scene.the_moonbase_sailor_cosmos', 'moonbase-scenes', this)">Sailor Cosmos</button>
-        <button class="scene-btn" onclick="activateScene('scene.the_moonbase_pokemon', 'moonbase-scenes', this)">Pok&#233;mon</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- BEDROOM -->
-  <div class="room-card">
-    <div class="room-header">
-      <span class="room-name">Bedroom</span>
-    </div>
-    <div class="room-body">
-      <div class="bedroom-toggle">
-        <span class="bedroom-label">Light</span>
-        <label class="toggle-switch big-toggle">
-          <input type="checkbox" id="tog-bedroom" onchange="toggleSwitch('switch.smart_indoor_plug_socket_1', this.checked)">
-          <div class="toggle-track"></div>
-        </label>
+      <!-- BEDROOM -->
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">Bedroom</span>
+        </div>
+        <div class="room-body">
+          <div class="bedroom-toggle">
+            <span class="bedroom-label">Light</span>
+            <label class="toggle-switch big-toggle">
+              <input type="checkbox" id="tog-bedroom" onchange="toggleSwitch('switch.smart_indoor_plug_socket_1', this.checked)">
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- end tab-home -->
+
+    <!-- OFFICE TAB -->
+    <div class="tab-content" id="tab-office">
+
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">Office</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="office-all" onchange="toggleRoom('office', this.checked)">
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="room-body">
+
+          <!-- Govee Lamp -->
+          <div class="light-row">
+            <div class="light-top">
+              <span class="light-name" id="name-off-lamp">Floor Lamp</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="tog-off-lamp" onchange="toggleLight('light.goveeoffice', this.checked, 'off-lamp')">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="brightness-row">
+              <span class="brightness-label active" id="bri-lbl-off-lamp">100%</span>
+              <input type="range" min="1" max="255" value="255" id="bri-off-lamp" onchange="setBrightnessOne('light.goveeoffice', 'off-lamp', this.value)">
+            </div>
+            <div class="color-swatches" id="colors-off-lamp">
+                <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.goveeoffice','255,107,107','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.goveeoffice','255,169,77','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.goveeoffice','255,224,102','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.goveeoffice','255,217,160','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.goveeoffice','255,255,255','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.goveeoffice','116,198,157','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.goveeoffice','77,171,247','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.goveeoffice','151,117,250','colors-off-lamp','dot-off-lamp',this)"></div>
+                <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.goveeoffice','247,131,172','colors-off-lamp','dot-off-lamp',this)"></div>
+              </div>
+              <div class="color-wheel-row">
+                <span class="color-wheel-label">Custom</span>
+                <input type="color" id="wheel-off-lamp" value="#ffffff" onchange="setColorWheel('light.goveeoffice', this.value, 'dot-off-lamp', 'colors-off-lamp')">
+          </div>
+        </div>
+
+          <!-- Play 1 -->
+          <div class="light-row">
+            <div class="light-top">
+              <span class="light-name" id="name-off-play1">Play 1</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="tog-off-play1" onchange="toggleLight('light.play_1', this.checked, 'off-play1')">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="brightness-row">
+              <span class="brightness-label active" id="bri-lbl-off-play1">100%</span>
+              <input type="range" min="1" max="255" value="255" id="bri-off-play1" onchange="setBrightnessOne('light.play_1', 'off-play1', this.value)">
+            </div>
+            <div class="color-swatches" id="colors-off-play1">
+                <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.play_1','255,107,107','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.play_1','255,169,77','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.play_1','255,224,102','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.play_1','255,217,160','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.play_1','255,255,255','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.play_1','116,198,157','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.play_1','77,171,247','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.play_1','151,117,250','colors-off-play1','dot-off-play1',this)"></div>
+                <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.play_1','247,131,172','colors-off-play1','dot-off-play1',this)"></div>
+              </div>
+              <div class="color-wheel-row">
+                <span class="color-wheel-label">Custom</span>
+                <input type="color" id="wheel-off-play1" value="#ffffff" onchange="setColorWheel('light.play_1', this.value, 'dot-off-play1', 'colors-off-play1')">
+          </div>
+        </div>
+
+          <!-- Play 2 -->
+          <div class="light-row">
+            <div class="light-top">
+              <span class="light-name" id="name-off-play2">Play 2</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="tog-off-play2" onchange="toggleLight('light.play_2', this.checked, 'off-play2')">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="brightness-row">
+              <span class="brightness-label active" id="bri-lbl-off-play2">100%</span>
+              <input type="range" min="1" max="255" value="255" id="bri-off-play2" onchange="setBrightnessOne('light.play_2', 'off-play2', this.value)">
+            </div>
+            <div class="color-swatches" id="colors-off-play2">
+                <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.play_2','255,107,107','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.play_2','255,169,77','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.play_2','255,224,102','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.play_2','255,217,160','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.play_2','255,255,255','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.play_2','116,198,157','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.play_2','77,171,247','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.play_2','151,117,250','colors-off-play2','dot-off-play2',this)"></div>
+                <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.play_2','247,131,172','colors-off-play2','dot-off-play2',this)"></div>
+              </div>
+              <div class="color-wheel-row">
+                <span class="color-wheel-label">Custom</span>
+                <input type="color" id="wheel-off-play2" value="#ffffff" onchange="setColorWheel('light.play_2', this.value, 'dot-off-play2', 'colors-off-play2')">
+          </div>
+        </div>
+
+          <!-- Play 3 -->
+          <div class="light-row">
+            <div class="light-top">
+              <span class="light-name" id="name-off-play3">Play 3</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="tog-off-play3" onchange="toggleLight('light.play_3', this.checked, 'off-play3')">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="brightness-row">
+              <span class="brightness-label active" id="bri-lbl-off-play3">100%</span>
+              <input type="range" min="1" max="255" value="255" id="bri-off-play3" onchange="setBrightnessOne('light.play_3', 'off-play3', this.value)">
+            </div>
+            <div class="color-swatches" id="colors-off-play3">
+                <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.play_3','255,107,107','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.play_3','255,169,77','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.play_3','255,224,102','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.play_3','255,217,160','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.play_3','255,255,255','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.play_3','116,198,157','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.play_3','77,171,247','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.play_3','151,117,250','colors-off-play3','dot-off-play3',this)"></div>
+                <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.play_3','247,131,172','colors-off-play3','dot-off-play3',this)"></div>
+              </div>
+              <div class="color-wheel-row">
+                <span class="color-wheel-label">Custom</span>
+                <input type="color" id="wheel-off-play3" value="#ffffff" onchange="setColorWheel('light.play_3', this.value, 'dot-off-play3', 'colors-off-play3')">
+          </div>
+        </div>
+
+        </div>
+      </div>
+
+    </div><!-- end tab-office -->
+
+  </div><!-- end tab-body -->
 
   <div id="toast" class="toast"></div>
 </div>
@@ -280,8 +426,29 @@ var MOONBASE_LIGHTS = [
   { entity: 'light.moonbase_monitor_1', key: 'mb-mon1' },
   { entity: 'light.moonbase_monitor_2', key: 'mb-mon2' }
 ];
+var OFFICE_LIGHTS = [
+  { entity: 'light.goveeoffice', key: 'off-lamp' },
+  { entity: 'light.play_1', key: 'off-play1' },
+  { entity: 'light.play_2', key: 'off-play2' },
+  { entity: 'light.play_3', key: 'off-play3' }
+];
 
 var toastTimer;
+
+function showTab(name) {
+  var tabs = ['home', 'office'];
+  for (var i = 0; i < tabs.length; i++) {
+    var content = document.getElementById('tab-' + tabs[i]);
+    var btn = document.getElementById('tab-btn-' + tabs[i]);
+    if (tabs[i] === name) {
+      content.className = 'tab-content active';
+      btn.className = 'tab-btn active';
+    } else {
+      content.className = 'tab-content';
+      btn.className = 'tab-btn';
+    }
+  }
+}
 
 function showToast(msg, isError) {
   var t = document.getElementById('toast');
@@ -371,6 +538,13 @@ function setBrightnessAll(val) {
   document.getElementById('piano-all').checked = true;
 }
 
+function setBrightnessOne(entity, key, val) {
+  var pct = Math.round(val / 255 * 100);
+  document.getElementById('bri-lbl-' + key).textContent = pct + '%';
+  callHA('light', 'turn_on', { entity_id: entity, brightness: parseInt(val) });
+  updateLightUI(key, true);
+}
+
 function setBrightnessRoom(room, val) {
   var pct = Math.round(val / 255 * 100);
   document.getElementById('bri-lbl-' + room).textContent = pct + '%';
@@ -382,7 +556,7 @@ function setBrightnessRoom(room, val) {
 }
 
 function toggleRoom(room, on) {
-  var lights = room === 'piano' ? PIANO_LIGHTS : MOONBASE_LIGHTS;
+  var lights = room === 'piano' ? PIANO_LIGHTS : (room === 'moonbase' ? MOONBASE_LIGHTS : OFFICE_LIGHTS);
   for (var i = 0; i < lights.length; i++) {
     callHA('light', on ? 'turn_on' : 'turn_off', { entity_id: lights[i].entity });
     updateLightUI(lights[i].key, on);
@@ -444,7 +618,7 @@ function activateScene(sceneId, containerId, btn) {
 }
 
 function allOff() {
-  var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS);
+  var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS).concat(OFFICE_LIGHTS);
   for (var i = 0; i < allLights.length; i++) {
     callHA('light', 'turn_off', { entity_id: allLights[i].entity });
     updateLightUI(allLights[i].key, false);
@@ -453,6 +627,7 @@ function allOff() {
   document.getElementById('tog-bedroom').checked = false;
   document.getElementById('piano-all').checked = false;
   document.getElementById('moonbase-all').checked = false;
+  document.getElementById('office-all').checked = false;
 }
 
 function fetchStates() {
@@ -468,7 +643,7 @@ function fetchStates() {
         var map = {};
         for (var i = 0; i < states.length; i++) { map[states[i].entity_id] = states[i]; }
 
-        var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS);
+        var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS).concat(OFFICE_LIGHTS);
         for (var j = 0; j < allLights.length; j++) {
           var s = map[allLights[j].entity];
           if (!s) continue;
@@ -480,6 +655,12 @@ function fetchStates() {
             setDot('dot-' + allLights[j].key, hex);
             var wheel = document.getElementById('wheel-' + allLights[j].key);
             if (wheel) wheel.value = hex;
+          }
+          if (on && s.attributes.brightness) {
+            var briEl = document.getElementById('bri-' + allLights[j].key);
+            var briLbl = document.getElementById('bri-lbl-' + allLights[j].key);
+            if (briEl) briEl.value = s.attributes.brightness;
+            if (briLbl) briLbl.textContent = Math.round(s.attributes.brightness / 255 * 100) + '%';
           }
         }
 
@@ -514,6 +695,13 @@ function fetchStates() {
           document.getElementById('bri-moonbase').value = avgMbBri;
           document.getElementById('bri-lbl-moonbase').textContent = Math.round(avgMbBri / 255 * 100) + '%';
         }
+
+        var officeOn = false;
+        for (var n = 0; n < OFFICE_LIGHTS.length; n++) {
+          var os = map[OFFICE_LIGHTS[n].entity];
+          if (os && os.state === 'on') { officeOn = true; break; }
+        }
+        document.getElementById('office-all').checked = officeOn;
 
         var bed = map['switch.smart_indoor_plug_socket_1'];
         if (bed) document.getElementById('tog-bedroom').checked = bed.state === 'on';
