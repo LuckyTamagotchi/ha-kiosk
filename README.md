@@ -11,6 +11,7 @@ git add -A && git commit -m "update" && git push
 Piano Left: light.h600b
 Piano Middle: light.h600b_2
 Piano Right: light.h600b_3
+Cat Lamp: light.catlamp
 Moonbase Lightstrip: light.moonbase_lightstrip
 Moonbase Monitor 1: light.moonbase_monitor_1
 Moonbase Monitor 2: light.moonbase_monitor_2
