@@ -105,6 +105,17 @@
     <!-- HOME TAB -->
     <div class="tab-content active" id="tab-home">
 
+      <!-- LIVING ROOM MASTER -->
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">Living Room</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog-living" onchange="toggleLivingRoom(this.checked)">
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+      </div>
+
       <!-- PIANO LAMP -->
       <div class="room-card">
         <div class="room-header">
@@ -220,6 +231,40 @@
         </div>
 
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAT LAMP -->
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">Cat Lamp</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog-cat" onchange="toggleLight('light.catlamp', this.checked, 'cat')">
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="room-body">
+          <div class="section-label">Brightness</div>
+          <div class="brightness-row">
+            <span class="brightness-label active" id="bri-lbl-cat">100%</span>
+            <input type="range" min="1" max="255" value="255" id="bri-cat" onchange="setBrightnessOne('light.catlamp', 'cat', this.value)">
+          </div>
+          <div class="divider"></div>
+          <div class="section-label">Color</div>
+          <div class="all-color-row">
+            <div class="color-swatches" id="colors-cat">
+              <div class="swatch" style="background:#ff6b6b" onclick="setColorOne('light.catlamp','255,107,107','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#ffa94d" onclick="setColorOne('light.catlamp','255,169,77','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#ffe066" onclick="setColorOne('light.catlamp','255,224,102','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#ffd9a0" onclick="setColorOne('light.catlamp','255,217,160','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#ffffff" onclick="setColorOne('light.catlamp','255,255,255','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#74c69d" onclick="setColorOne('light.catlamp','116,198,157','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#4dabf7" onclick="setColorOne('light.catlamp','77,171,247','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#9775fa" onclick="setColorOne('light.catlamp','151,117,250','colors-cat','dot-cat',this)"></div>
+              <div class="swatch" style="background:#f783ac" onclick="setColorOne('light.catlamp','247,131,172','colors-cat','dot-cat',this)"></div>
+            </div>
+            <input type="color" id="wheel-cat" value="#ffffff" onchange="setColorWheel('light.catlamp', this.value, 'dot-cat', 'colors-cat')">
           </div>
         </div>
       </div>
@@ -426,6 +471,9 @@ var MOONBASE_LIGHTS = [
   { entity: 'light.moonbase_monitor_1', key: 'mb-mon1' },
   { entity: 'light.moonbase_monitor_2', key: 'mb-mon2' }
 ];
+var CAT_LIGHTS = [
+  { entity: 'light.catlamp', key: 'cat' }
+];
 var OFFICE_LIGHTS = [
   { entity: 'light.goveeoffice', key: 'off-lamp' },
   { entity: 'light.play_1', key: 'off-play1' },
@@ -555,6 +603,15 @@ function setBrightnessRoom(room, val) {
   if (room === 'moonbase') document.getElementById('moonbase-all').checked = true;
 }
 
+function toggleLivingRoom(on) {
+  var lights = PIANO_LIGHTS.concat(CAT_LIGHTS);
+  for (var i = 0; i < lights.length; i++) {
+    callHA('light', on ? 'turn_on' : 'turn_off', { entity_id: lights[i].entity });
+    updateLightUI(lights[i].key, on);
+  }
+  document.getElementById('piano-all').checked = on;
+}
+
 function toggleRoom(room, on) {
   var lights = room === 'piano' ? PIANO_LIGHTS : (room === 'moonbase' ? MOONBASE_LIGHTS : OFFICE_LIGHTS);
   for (var i = 0; i < lights.length; i++) {
@@ -618,12 +675,13 @@ function activateScene(sceneId, containerId, btn) {
 }
 
 function allOff() {
-  var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS).concat(OFFICE_LIGHTS);
+  var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS).concat(CAT_LIGHTS).concat(OFFICE_LIGHTS);
   for (var i = 0; i < allLights.length; i++) {
     callHA('light', 'turn_off', { entity_id: allLights[i].entity });
     updateLightUI(allLights[i].key, false);
   }
   callHA('switch', 'turn_off', { entity_id: 'switch.smart_indoor_plug_socket_1' });
+  document.getElementById('tog-living').checked = false;
   document.getElementById('tog-bedroom').checked = false;
   document.getElementById('piano-all').checked = false;
   document.getElementById('moonbase-all').checked = false;
@@ -643,7 +701,7 @@ function fetchStates() {
         var map = {};
         for (var i = 0; i < states.length; i++) { map[states[i].entity_id] = states[i]; }
 
-        var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS).concat(OFFICE_LIGHTS);
+        var allLights = PIANO_LIGHTS.concat(MOONBASE_LIGHTS).concat(CAT_LIGHTS).concat(OFFICE_LIGHTS);
         for (var j = 0; j < allLights.length; j++) {
           var s = map[allLights[j].entity];
           if (!s) continue;
@@ -663,6 +721,14 @@ function fetchStates() {
             if (briLbl) briLbl.textContent = Math.round(s.attributes.brightness / 255 * 100) + '%';
           }
         }
+
+        var livingOn = false;
+        var livingLights = PIANO_LIGHTS.concat(CAT_LIGHTS);
+        for (var lv = 0; lv < livingLights.length; lv++) {
+          var lvs = map[livingLights[lv].entity];
+          if (lvs && lvs.state === 'on') { livingOn = true; break; }
+        }
+        document.getElementById('tog-living').checked = livingOn;
 
         var pianoOn = false;
         var pianoBri = 0; var pianoBriCount = 0;
