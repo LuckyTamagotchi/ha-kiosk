@@ -551,6 +551,7 @@ function showTab(name) {
       btn.className = 'tab-btn';
     }
   }
+  if (name === 'transit') muniRefresh();
 }
 
 function showToast(msg, isError) {
@@ -950,8 +951,19 @@ function muniFetchStop(stop) {
   xhr.send();
 }
 
+var muniLastFetchStart = 0;
+
 function muniFetchAll() {
+  muniLastFetchStart = new Date().getTime();
+  var footer = document.getElementById('muni-footer');
+  if (footer) { footer.className = 'transit-footer'; footer.textContent = 'updating…'; }
   for (var i = 0; i < MUNI_STOPS.length; i++) muniFetchStop(MUNI_STOPS[i]);
+}
+
+// Refresh on tab press, but at most once every 60s (511 allows 60 req/hr)
+function muniRefresh() {
+  if (new Date().getTime() - muniLastFetchStart < 60000) { muniRender(); return; }
+  muniFetchAll();
 }
 
 muniFetchAll();
