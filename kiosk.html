@@ -85,6 +85,19 @@
   .all-color-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
   .all-color-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #444; letter-spacing: 0.1em; text-transform: uppercase; -webkit-flex-shrink: 0; flex-shrink: 0; min-width: 28px; margin-right: 10px; }
   .piano-bulbs-grid { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
+
+  /* Transit */
+  .transit-badge { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; width: 26px; height: 26px; line-height: 26px; border-radius: 50%; text-align: center; -webkit-flex-shrink: 0; flex-shrink: 0; }
+  .transit-badge.line-n { background: #005b95; color: #fff; }
+  .transit-badge.line-7 { background: #d6a000; color: #000; }
+  .transit-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; padding: 14px; background: #0d0d0d; border: 1px solid #191919; border-radius: 6px; margin-bottom: 8px; }
+  .transit-row:last-child { margin-bottom: 0; }
+  .transit-dir { font-size: 15px; color: #ccc; }
+  .transit-times { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 500; color: #52b788; white-space: nowrap; }
+  .transit-times .transit-unit { font-size: 11px; color: #444; font-weight: 400; }
+  .transit-times.transit-none { color: #444; font-size: 12px; font-weight: 400; }
+  .transit-footer { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #444; text-transform: uppercase; text-align: right; padding: 2px 4px 0; }
+  .transit-footer.error { color: #b78852; }
 </style>
 </head>
 <body>
@@ -98,6 +111,7 @@
   <div class="tabs">
     <button class="tab-btn active" id="tab-btn-home" onclick="showTab('home')">Home</button>
     <button class="tab-btn" id="tab-btn-office" onclick="showTab('office')">Office</button>
+    <button class="tab-btn" id="tab-btn-transit" onclick="showTab('transit')">Transit</button>
   </div>
 
   <div class="tab-body">
@@ -452,6 +466,47 @@
 
     </div><!-- end tab-office -->
 
+    <!-- TRANSIT TAB -->
+    <div class="tab-content" id="tab-transit">
+
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">N Judah &mdash; 9th &amp; Irving</span>
+          <span class="transit-badge line-n">N</span>
+        </div>
+        <div class="room-body">
+          <div class="transit-row">
+            <span class="transit-dir">Downtown</span>
+            <span class="transit-times transit-none" id="muni-n-ib">&hellip;</span>
+          </div>
+          <div class="transit-row">
+            <span class="transit-dir">Ocean Beach</span>
+            <span class="transit-times transit-none" id="muni-n-ob">&hellip;</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="room-card">
+        <div class="room-header">
+          <span class="room-name">7 Haight &mdash; 9th &amp; Lincoln</span>
+          <span class="transit-badge line-7">7</span>
+        </div>
+        <div class="room-body">
+          <div class="transit-row">
+            <span class="transit-dir">Downtown</span>
+            <span class="transit-times transit-none" id="muni-7-ib">&hellip;</span>
+          </div>
+          <div class="transit-row">
+            <span class="transit-dir">Ocean Beach</span>
+            <span class="transit-times transit-none" id="muni-7-ob">&hellip;</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit-footer" id="muni-footer">loading&hellip;</div>
+
+    </div><!-- end tab-transit -->
+
   </div><!-- end tab-body -->
 
   <div id="toast" class="toast"></div>
@@ -484,7 +539,7 @@ var OFFICE_LIGHTS = [
 var toastTimer;
 
 function showTab(name) {
-  var tabs = ['home', 'office'];
+  var tabs = ['home', 'office', 'transit'];
   for (var i = 0; i < tabs.length; i++) {
     var content = document.getElementById('tab-' + tabs[i]);
     var btn = document.getElementById('tab-btn-' + tabs[i]);
@@ -782,6 +837,126 @@ function fetchStates() {
 
 fetchStates();
 setInterval(fetchStates, 10000);
+
+/* ===== Muni transit (511.org) ===== */
+var MUNI_KEY = '0289f329-e117-40a9-98a9-096df731e7bb';
+var MUNI_PROXY = ''; // set if CORS blocks direct requests
+var MUNI_FETCH_MS = 5 * 60 * 1000; // 4 stops every 5 min = 48 req/hr (limit 60)
+var MUNI_TICK_MS = 20 * 1000;
+var MUNI_MAX_SHOWN = 3;
+var MUNI_STOPS = [
+  { id: 'muni-n-ib', line: 'N', stopCode: '17996' },
+  { id: 'muni-n-ob', line: 'N', stopCode: '17999' },
+  { id: 'muni-7-ib', line: '7', stopCode: '15301' },
+  { id: 'muni-7-ob', line: '7', stopCode: '15300' }
+];
+var muniArrivals = {};
+var muniLastOk = null;
+var muniLastError = null;
+
+function muniParseSiri(data, line) {
+  var out = [];
+  try {
+    var deliveries = data.ServiceDelivery.StopMonitoringDelivery;
+    if (Object.prototype.toString.call(deliveries) !== '[object Array]') {
+      deliveries = [deliveries];
+    }
+    for (var d = 0; d < deliveries.length; d++) {
+      var visits = deliveries[d].MonitoredStopVisit || [];
+      for (var i = 0; i < visits.length; i++) {
+        var mvj = visits[i].MonitoredVehicleJourney;
+        if (!mvj || String(mvj.LineRef) !== line) continue;
+        var call = mvj.MonitoredCall;
+        if (!call) continue;
+        var iso = call.ExpectedArrivalTime || call.AimedArrivalTime;
+        if (!iso) continue;
+        var t = Date.parse(iso);
+        if (!isNaN(t)) out.push(t);
+      }
+    }
+  } catch (e) { /* malformed payload -> empty */ }
+  out.sort(function (a, b) { return a - b; });
+  return out;
+}
+
+function muniRender() {
+  var now = new Date().getTime();
+  for (var s = 0; s < MUNI_STOPS.length; s++) {
+    var el = document.getElementById(MUNI_STOPS[s].id);
+    if (!el) continue;
+    var list = muniArrivals[MUNI_STOPS[s].id];
+    if (!list) {
+      el.className = 'transit-times transit-none';
+      el.innerHTML = '&mdash;';
+      continue;
+    }
+    var mins = [];
+    for (var i = 0; i < list.length && mins.length < MUNI_MAX_SHOWN; i++) {
+      var m = Math.round((list[i] - now) / 60000);
+      if (m < 0) continue;
+      mins.push(m < 1 ? 'Now' : String(m));
+    }
+    if (mins.length === 0) {
+      el.className = 'transit-times transit-none';
+      el.innerHTML = 'no arrivals';
+    } else {
+      el.className = 'transit-times';
+      el.innerHTML = mins.join(', ') + ' <span class="transit-unit">min</span>';
+    }
+  }
+  var footer = document.getElementById('muni-footer');
+  if (!footer) return;
+  if (muniLastError) {
+    footer.className = 'transit-footer error';
+    footer.textContent = muniLastError;
+  } else if (muniLastOk) {
+    var age = Math.round((now - muniLastOk) / 60000);
+    footer.className = 'transit-footer';
+    footer.textContent = 'updated ' + (age < 1 ? 'just now' : age + ' min ago');
+  }
+}
+
+function muniFetchStop(stop) {
+  var url = 'https://api.511.org/transit/StopMonitoring?api_key=' +
+    encodeURIComponent(MUNI_KEY) + '&agency=SF&stopcode=' +
+    stop.stopCode + '&format=json';
+  if (MUNI_PROXY) url = MUNI_PROXY + encodeURIComponent(url);
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.timeout = 15000;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState !== 4) return;
+    if (xhr.status === 200) {
+      try {
+        // 511 responses start with a UTF-8 BOM that breaks JSON.parse
+        var text = xhr.responseText.replace(/^\uFEFF/, '');
+        muniArrivals[stop.id] = muniParseSiri(JSON.parse(text), stop.line);
+        muniLastOk = new Date().getTime();
+        muniLastError = null;
+      } catch (e) {
+        muniLastError = 'bad response';
+      }
+    } else if (xhr.status === 401) {
+      muniLastError = 'invalid API key';
+    } else if (xhr.status === 429) {
+      muniLastError = 'rate limited';
+    } else if (xhr.status === 0) {
+      muniLastError = 'blocked (CORS?)';
+    } else {
+      muniLastError = 'offline (' + xhr.status + ')';
+    }
+    muniRender();
+  };
+  xhr.send();
+}
+
+function muniFetchAll() {
+  for (var i = 0; i < MUNI_STOPS.length; i++) muniFetchStop(MUNI_STOPS[i]);
+}
+
+muniFetchAll();
+setInterval(muniFetchAll, MUNI_FETCH_MS);
+setInterval(muniRender, MUNI_TICK_MS);
 </script>
 </body>
 </html>

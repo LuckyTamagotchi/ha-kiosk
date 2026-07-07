@@ -1,11 +1,10 @@
 # HA Kiosk Dashboard
 
-## Deploy update to Pi
-curl -o /config/www/kiosk.html "https://raw.githubusercontent.com/LuckyTamagotchi/ha-kiosk/master/kiosk.html?$(date +%s)"
+## Push update to GitHub (in Mac Terminal)
+cp "/Users/grantgordon/Documents/Claude/Projects/Home Assistant Pi 4/kiosk.html" ~/ha-kiosk/kiosk.html && cd ~/ha-kiosk && git add -A && git commit -m "update" && git push
 
-## Push update to GitHub
-cd ~/ha-kiosk
-git add -A && git commit -m "update" && git push
+## Deploy update to Pi (in HA terminal)
+curl -o /config/www/kiosk.html "https://raw.githubusercontent.com/LuckyTamagotchi/ha-kiosk/master/kiosk.html?$(date +%s)"
 
 ## Entity IDs
 Piano Left: light.h600b
